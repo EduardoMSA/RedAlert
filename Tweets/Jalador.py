@@ -9,7 +9,7 @@ import twitter_credentials
 import numpy as np
 import pandas as pd
 
-class StdOutListener(StreamListener, file):
+class StdOutListener(StreamListener):
     print("Waiting")
 
     def on_status(self, status):
@@ -19,9 +19,6 @@ class StdOutListener(StreamListener, file):
         print(datos)
         if status.retweeted:
             return
-
-        file.write(datos)
-        file.write('/n')
 
 
 
@@ -33,9 +30,8 @@ class StdOutListener(StreamListener, file):
 if __name__ == "__main__":
 
 
-    saveFile = open('911.csv', 'w+')
 
-    l =StdOutListener(StreamListener,saveFile)
+    l =StdOutListener()
 
     auth = OAuthHandler(twitter_credentials.CONSUMER_KEY,twitter_credentials.CONSUMER_SECRET)
     auth.set_access_token(twitter_credentials.ACCESS_TOKEN,twitter_credentials.ACCESS_TOKEN_SECRET)
@@ -45,16 +41,7 @@ if __name__ == "__main__":
     #stream.filter(follow=['4501789032'])
     stream.filter(follow=['2262123079'])
 
-    close(saveFile)
 
 
 
 
-
-
-
-    #print(tweets[0].id)
-    #print(tweets[0].retweet_count)
-
-
-    #df.to_json('ejemplo.json')
