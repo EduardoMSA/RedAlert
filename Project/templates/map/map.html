@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title></title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.4.1/mapbox-gl.css' rel='stylesheet' />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+      }
+
+      .marker {
+        background-image: url('/static/img/mapbox-icon.png');
+        background-size: cover;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+
+      .mapboxgl-popup {
+        max-width: 200px;
+      }
+
+      .mapboxgl-popup-content {
+        text-align: center;
+        font-family: 'Open Sans', sans-serif;
+      }
+
+    </style>
+</head>
+<body>
+<div id='map'></div>
+
+<script>
+
+mapboxgl.accessToken = 'pk.eyJ1IjoiY2VkZW5vMTAiLCJhIjoiY2sxODg1d3gyMXAxMzNibW9lczYwc3ZmOSJ9.y10wslhljab7C418xgwp1Q';
+
+var map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/streets-v11',
+  center: [-103.35, 20.68],
+  zoom: 5.2,
+  minZoom: 5.2,
+  maxZoom: 18,
+  pitch: 40
+});
+
+    map.addControl(new mapboxgl.NavigationControl());
+
+    var geolocate = new mapboxgl.GeolocateControl();
+    map.addControl(geolocate);
+
+    geolocate.on('geolocate', function(e) {
+      var lon = e.coords.longitude;
+      var lat = e.coords.latitude;
+      var position = [lon, lat];
+      var lonX;
+      var latY;
+      let testGeoJSON;
+      fetch('https://raw.githubusercontent.com/Angeljcc102/Red_alert/master/test-1.geojson')
+        .then(r => r.json())
+        .then((test) => {
+          test.features.forEach(marker => {
+            var locations = marker.geometry.coordinates;
+            // console.log(marker.geometry.coordinates[0]);
+            // console.log(marker.geometry.coordinates[1]);
+            lonX = Math.abs(position[0] - marker.geometry.coordinates[0]);
+            latY = Math.abs(position[1] - marker.geometry.coordinates[1]);
+            if (lonX <= 0.05 && latY <= 0.05) {
+              // create a HTML element for each feature
+              var el = document.createElement('div');
+              el.className = 'marker';
+              // make a marker for each feature and add to the map
+              new mapboxgl.Marker(el)
+                .setLngLat(marker.geometry.coordinates)
+                .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
+                .setHTML('<h3>' + marker.properties.title + '</h3><p>' + marker.properties.description + '</p>'))
+                .addTo(map);
+            }
+          });
+
+          testGeoJSON = test;
+
+          map.addSource(test, {
+            'type': 'geojson',
+            'data': test
+          });
+      });
+
+      map.addLayer({
+        "id": "test",
+        "type": "circle",
+        "source": 'test',
+        "paint": {
+          "circle-radius": [
+            "interpolate", ["linear"], ["zoom"],
+            11, 1,
+            22, 4
+          ],
+          "circle-stroke-color": "#fff",
+          "circle-stroke-width": 1,
+          "circle-stroke-opacity": 0.2
+        }
+      });
+    });
+
+
+</script>
+  <div>
+  </div>
+</body>
+</html>
